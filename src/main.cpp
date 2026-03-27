@@ -1,18 +1,56 @@
 #include <Arduino.h>
+#include <Adafruit_MPU6050.h>
+#include <Adafruit_Sensor.h>
+#include <Wire.h>
 
-// put function declarations here:
-int myFunction(int, int);
+Adafruit_MPU6050 mpu;
 
 void setup() {
-  // put your setup code here, to run once:
-  int result = myFunction(2, 3);
+  Serial.begin(115200);
+  while (!Serial)
+    delay(10); 
+
+  Serial.println("Starting MPU6050");
+
+  //Dùng chân SDA = 9, SCL = 8
+  if (!mpu.begin()) {
+    Serial.println("Check connection again");
+    while (1) {
+      delay(10);
+    }
+  }
+  Serial.println("Success connect to MPU6050");
+
+  //Cấu hình các thang đo cho Fall Detection
+  mpu.setAccelerometerRange(MPU6050_RANGE_8_G); 
+  mpu.setGyroRange(MPU6050_RANGE_500_DEG);     
+  mpu.setFilterBandwidth(MPU6050_BAND_21_HZ);  
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-}
+  sensors_event_t a, g, temp;
+  mpu.getEvent(&a, &g, &temp); 
 
-// put function definitions here:
-int myFunction(int x, int y) {
-  return x + y;
+  Serial.print("Acceleration      | X: "); 
+  Serial.print(a.acceleration.x);
+  Serial.print("  Y: "); 
+  Serial.print(a.acceleration.y);
+  Serial.print("  Z: "); 
+  Serial.print(a.acceleration.z);
+  Serial.println(" m/s^2");
+
+  Serial.print("Angular velocity  | X: "); 
+  Serial.print(g.gyro.x);
+  Serial.print("  Y: "); 
+  Serial.print(g.gyro.y);
+  Serial.print("  Z: "); 
+  Serial.print(g.gyro.z);
+  Serial.println(" rad/s");
+
+  Serial.print("Temperature     | "); 
+  Serial.print(temp.temperature);
+  Serial.println(" *C");
+  Serial.println("---------------------------------------------------");
+  
+  delay(500);
 }
